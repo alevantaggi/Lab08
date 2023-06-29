@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import it.polito.tdp.extflightdelays.model.Airline;
 import it.polito.tdp.extflightdelays.model.Airport;
@@ -91,4 +92,43 @@ public class ExtFlightDelaysDAO {
 			throw new RuntimeException("Error Connection Database");
 		}
 	}
+	
+	public  List<Flight> voliConTratteMaggioriDi(double x,Map<Integer, Airport> airportIdMap) {
+		List<Flight> risultato= new ArrayList<>();
+//		String sql="SELECT ORIGIN_AIRPORT_ID, DESTINATION_AIRPORT_ID, AVG(DISTANCE) AS mediaRotta FROM flights GROUP BY ORIGIN_AIRPORT_ID, DESTINATION_AIRPORT_ID";
+		String sql= "SELECT tab1.ORIGIN_AIRPORT_ID, tab1.DESTINATION_AIRPORT_ID, tab1.mediaRotta,(tab1.mediaRotta*tab1.numOsservazioni+tab2.mediaRotta*tab2.numOsservazioni)/ (tab1.numOsservazioni+tab2.numOsservazioni) AS tot "
+				+ "FROM "
+				+ "(SELECT ORIGIN_AIRPORT_ID, DESTINATION_AIRPORT_ID, AVG(DISTANCE) AS mediaRotta, COUNT(*) AS  numOsservazioni "
+				+ "FROM flights "
+				+ "GROUP BY ORIGIN_AIRPORT_ID, DESTINATION_AIRPORT_ID) AS tab1 "
+				+ "LEFT JOIN "
+				+ "(SELECT ORIGIN_AIRPORT_ID, DESTINATION_AIRPORT_ID, AVG(DISTANCE) AS mediaRotta, COUNT(*) AS  numOsservazioni "
+				+ "FROM flights "
+				+ "GROUP BY ORIGIN_AIRPORT_ID, DESTINATION_AIRPORT_ID) AS tab2 "
+				+ "on (tab1.ORIGIN_AIRPORT_ID=tab2.DESTINATION_AIRPORT_ID AND tab2.ORIGIN_AIRPORT_ID=tab1.DESTINATION_AIRPORT_ID)";
+		try {
+			Connection conn= ConnectDB.getConnection();
+			PreparedStatement st= conn.prepareStatement(sql);
+			ResultSet rs= st.executeQuery();
+			
+			while (rs.next()) {
+				double rottaMedia= rs.getDouble("tot");
+				if (rottaMedia==0)
+					rottaMedia=rs.getDouble("mediaRotta");
+				if(rottaMedia > x) {
+					Flight flight = new Flight(airportIdMap.get(rs.getInt("ORIGIN_AIRPORT_ID")),airportIdMap.get(rs.getInt("DESTINATION_AIRPORT_ID")),rottaMedia);
+					risultato.add(flight);
+				}
+			}
+			
+			conn.close();
+			return risultato;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
+	
 }

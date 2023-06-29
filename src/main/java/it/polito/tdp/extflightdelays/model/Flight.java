@@ -16,6 +16,9 @@ public class Flight {
 	private int distance;
 	private LocalDateTime arrivalDate;
 	private Double arrivalDelay;
+	private Airport partenza;
+	private Airport arrivo;
+	private Double meanRoute;
 
 	public Flight(int id, int airlineId, int flightNumber, String tailNumber, int originAirportId,
 			int destinationAirportId, LocalDateTime scheduledDepartureDate, Double departureDelay, Double elapsedTime,
@@ -32,6 +35,25 @@ public class Flight {
 		this.distance = distance;
 		this.arrivalDate = arrivalDate;
 		this.arrivalDelay = arrivalDelay;
+	}
+
+	public Flight(Airport partenza, Airport arrivo, Double meanRoute) {
+		this.partenza = partenza;
+		this.arrivo = arrivo;
+		this.meanRoute = meanRoute;
+	}
+
+
+	public Airport getPartenza() {
+		return partenza;
+	}
+
+	public Airport getArrivo() {
+		return arrivo;
+	}
+
+	public Double getMeanRoute() {
+		return meanRoute;
 	}
 
 	public int getId() {

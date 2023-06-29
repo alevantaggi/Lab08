@@ -7,6 +7,10 @@ package it.polito.tdp.extflightdelays;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import org.jgrapht.Graph;
+import org.jgrapht.graph.DefaultWeightedEdge;
+
+import it.polito.tdp.extflightdelays.model.Airport;
 import it.polito.tdp.extflightdelays.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -35,7 +39,26 @@ public class FXMLController {
 
     @FXML
     void doAnalizzaAeroporti(ActionEvent event) {
-    	//TODO
+    	txtResult.setText("");
+    
+    	try {
+    		Double x=Double.parseDouble(distanzaMinima.getText()); 
+	    	this.model.creaGrafoRotteMaggioriDi(x);
+	    	Graph<Airport,DefaultWeightedEdge> risultato= this.model.getGrafo();
+	    	
+	    	txtResult.setText("Ho trovato: "+risultato.vertexSet().size()+" vertici\n");
+	    	txtResult.appendText("Ho trovato: "+risultato.edgeSet().size()+" archi\n");
+	    	
+	    	for(DefaultWeightedEdge dwe: risultato.edgeSet())
+		    	txtResult.appendText(dwe.toString()+" "+risultato.getEdgeWeight(dwe)+"\n");
+
+		} catch (Exception e) {
+			distanzaMinima.setText("");
+			txtResult.setText("Inserisci un valore valido");
+		}
+    	
+    	
+    	
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
